@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userservice
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: userservice # Service_user.yaml будет смотреть на этот лейбл Подов
+    spec:
+      containers:
+        - name: project
+          image: johnynice/project:v1
+          ports:
+            - containerPort: 8080
+          envFrom: # <-- вот здесь подключаем ConfigMap
+            - configMapRef:
+                name: userservice-config
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_PASSWORD
+
+#          livenessProbe:
+#            httpGet:
+#              path: /user # Путь, по которому будет проверяться здоровье
+#              port: 8080
+#            initialDelaySeconds: 30
+#            periodSeconds: 10
+#          readinessProbe:
+#            httpGet:
+#              path: /user # Путь, по которому будет проверяться готовность
+#              port: 8080
+#            initialDelaySeconds: 5
+#            periodSeconds: 5

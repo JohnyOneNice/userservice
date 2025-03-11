@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+repository: postgres
+tag: "17"
+pullPolicy: IfNotPresent
+
+service:
+name: postgres
+type: ClusterIP
+port: 5432
+
+secretName: db-credentials
+secretKeys:
+userKey: POSTGRES_USER
+passwordKey: POSTGRES_PASSWORD
+
+storage:
+size: 1Gi
