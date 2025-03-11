@@ -7,9 +7,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: postgresql
       protocol: TCP
-      name: http
+      port: {{ .Values.service.port }}
+      targetPort: 5432
   selector:
-    {{- include "my-postgres-chart.selectorLabels" . | nindent 4 }}
+    app: {{ include "my-postgres-chart.name" }}
