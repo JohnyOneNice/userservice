@@ -15,8 +15,9 @@ spec:
         app: userservice # Service_user.yaml будет смотреть на этот лейбл Подов
     spec:
       containers:
-        - name: project
-          image: johnynice/project:v1
+        - name: userproject
+          image: johnynice/projectuser:v1
+          #imagePullPolicy: IfNotPresent #Использовать образ из DockerHUb, если не нашли локально
           ports:
             - containerPort: 8080
           envFrom: # <-- вот здесь подключаем ConfigMap

@@ -1,0 +1,12 @@
+server:
+  persistentVolume:
+    enabled: false  # Для Minikube отключаем постоянное хранилище
+
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false
+
+nodeExporter:
+  enabled: false
