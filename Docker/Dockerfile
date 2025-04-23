@@ -1,4 +1,4 @@
-FROM openjdk:17
-COPY SeregaProject.jar project.jar
+FROM amazoncorretto:17-alpine
+COPY serviceone.jar projectuser.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-Dspring.datasource.driver-class-name=org.postgresql.Driver","-jar", "project.jar"]
+ENTRYPOINT ["java","-Djdk.util.systemMetrics.enabled=false","-Dspring.datasource.driver-class-name=org.postgresql.Driver","-jar","projectuser.jar"]
