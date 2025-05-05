@@ -9,7 +9,7 @@ spec:
       http:
         paths:
           # Маршрут для user-service
-          - path: /api/user(/|$)(.*)  # Новый префикс!
+          - path: /api/user
             pathType: Prefix
             backend:
               service:
@@ -18,7 +18,7 @@ spec:
                   number: 80
 
           # Маршрут для auth-service
-          - path: /api/auth(/|$)(.*)   # Префикс для auth-service
+          - path: /api/auth
             pathType: Prefix
             backend:
               service:
