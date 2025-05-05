@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: userproject
-          image: johnynice/projectuser:v1
+          image: johnynice/projectuser2:1
           #imagePullPolicy: IfNotPresent #Использовать образ из DockerHUb, если не нашли локально
           ports:
             - containerPort: 8080
@@ -34,16 +34,3 @@ spec:
                 secretKeyRef:
                   name: db-credentials
                   key: POSTGRES_PASSWORD
-
-#          livenessProbe:
-#            httpGet:
-#              path: /user # Путь, по которому будет проверяться здоровье
-#              port: 8080
-#            initialDelaySeconds: 30
-#            periodSeconds: 10
-#          readinessProbe:
-#            httpGet:
-#              path: /user # Путь, по которому будет проверяться готовность
-#              port: 8080
-#            initialDelaySeconds: 5
-#            periodSeconds: 5

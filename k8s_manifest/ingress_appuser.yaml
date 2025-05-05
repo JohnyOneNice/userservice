@@ -5,13 +5,23 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: arch.homework
+    - host: arch.homework # Общий хост
       http:
         paths:
-          - path: /
+          # Маршрут для user-service
+          - path: /api/user
             pathType: Prefix
             backend:
               service:
-                name: service-appuser
+                name: service-appuser  # Kubernetes Service для user-service
+                port:
+                  number: 80
+
+          # Маршрут для auth-service
+          - path: /api/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service  # Имя Service для auth-service
                 port:
                   number: 80
