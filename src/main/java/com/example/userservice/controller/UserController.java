@@ -2,12 +2,14 @@ package com.example.userservice.controller;
 
 import com.example.userservice.model.User;
 import com.example.userservice.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -67,14 +69,35 @@ public class UserController {
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<?> getUserByUsername(@PathVariable String username, Authentication authentication) {
-        String requesterName = authentication.getName();
-        if (!username.equals(requesterName)) {
-            return ResponseEntity.status(403).body("Forbidden: Access denied to user data");
+    public ResponseEntity<?> getUserByUsername(
+            @PathVariable String username,
+            HttpServletRequest request,
+            Authentication authentication) {
+        String remoteAddr  = request.getRemoteAddr();
+        // 1. Разрешаем доступ с внутренних IP
+        if (remoteAddr.equals("127.0.0.1") ||
+                remoteAddr.startsWith("172.") ||
+                remoteAddr.startsWith("10.") ||
+                remoteAddr.startsWith("192.168.")) {
+            Optional<User> user = userRepository.findByUsername(username);
+            return user.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
         }
 
-        Optional<User> user = userRepository.findByUsername(username);
-        return user.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        // 2. Проверяем, аутентифицирован ли пользователь (наличие JWT)
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        String requesterName = authentication.getName();
+
+        // 3. Только если имя из токена совпадает с запрошенным — разрешаем
+        if (!username.equals(requesterName)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden: Access denied to user data");
+        }
+
+        return userRepository.findByUsername(username)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }
