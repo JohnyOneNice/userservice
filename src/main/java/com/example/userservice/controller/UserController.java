@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +19,13 @@ import java.util.UUID;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        // Хешируем пароль перед сохранением
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         User createdUser = userRepository.save(user);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
