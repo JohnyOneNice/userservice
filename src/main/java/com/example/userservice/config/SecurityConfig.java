@@ -25,7 +25,8 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/username/**").authenticated()
+                        .requestMatchers("/api/user/internal/").permitAll() // разрешаем внутренний вызов
+                        .requestMatchers("/api/user/username/").authenticated() // всё остальное требует JWT
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
