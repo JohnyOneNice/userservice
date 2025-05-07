@@ -82,7 +82,7 @@ public class UserController {
         String remoteAddr = request.getRemoteAddr();
         logger.info("Request from IP: {} to /username/{}", remoteAddr, username);
 
-        // 1. Разрешаем доступ с внутренних IP
+        /* 1. Разрешаем доступ с внутренних IP
         if (remoteAddr.equals("127.0.0.1") ||
                 remoteAddr.startsWith("172.") ||
                 remoteAddr.startsWith("10.") ||
@@ -90,7 +90,7 @@ public class UserController {
             Optional<User> user = userRepository.findByUsername(username);
             return user.map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
-        }
+        } */
 
         // 2. Проверяем, аутентифицирован ли пользователь (наличие JWT)
         if (authentication == null || !authentication.isAuthenticated()) {
