@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: userproject
-          image: johnynice/projectuser9:1
+          image: johnynice/projectuser11:1
           #imagePullPolicy: IfNotPresent #Использовать образ из DockerHUb, если не нашли локально
           ports:
             - containerPort: 8080
