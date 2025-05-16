@@ -80,12 +80,19 @@ public class UserController {
             Authentication authentication) {
 
         String remoteAddr = request.getRemoteAddr();
-        // ЛОГИРОВАНИЕ
         logger.info("Request from IP: {} to /username/{}", remoteAddr, username);
-        logger.info("JWT subject from token (authentication.getName()): {}", authentication != null ? authentication.getName() : "null");
-        logger.info("Username from URL: {}", username);
 
-        //  Проверяем, аутентифицирован ли пользователь (наличие JWT)
+        /* 1. Разрешаем доступ с внутренних IP
+        if (remoteAddr.equals("127.0.0.1") ||
+                remoteAddr.startsWith("172.") ||
+                remoteAddr.startsWith("10.") ||
+                remoteAddr.startsWith("192.168.")) {
+            Optional<User> user = userRepository.findByUsername(username);
+            return user.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } */
+
+        // 2. Проверяем, аутентифицирован ли пользователь (наличие JWT)
         if (authentication == null || !authentication.isAuthenticated()) {
             logger.warn("Unauthorized access attempt to /username/{} from {}", username, remoteAddr);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -94,9 +101,9 @@ public class UserController {
         String requesterName = authentication.getName();
         logger.info(" Authenticated username from token: {}", requesterName);
 
-        // Только если имя из токена совпадает с запрошенным — разрешаем
+        // 3. Только если имя из токена совпадает с запрошенным — разрешаем
         if (!username.equals(requesterName)) {
-            logger.warn("Forbidden: '{}' (from JWT) ≠ '{}' (from URL)", requesterName, username);
+            logger.warn("Forbidden: requested '{}' but token contains '{}'", username, requesterName);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden: Access denied to user data");
         }
 
