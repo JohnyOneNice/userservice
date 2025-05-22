@@ -34,12 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7); // Remove "Bearer "
+        //String token = authHeader.substring(7); // Remove "Bearer "
 
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(jwtSecret.getBytes())
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(authHeader)
                     .getBody();
 
             String username = claims.getSubject();

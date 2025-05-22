@@ -25,3 +25,12 @@ spec:
                 name: auth-service  # Имя Service для auth-service
                 port:
                   number: 80
+
+          # Маршрут для billing_service
+          - path: /api/billing
+            pathType: Prefix
+            backend:
+              service:
+                name: billing-service  # Имя Service для billing_service
+                port:
+                  number: 80

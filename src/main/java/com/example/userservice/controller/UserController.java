@@ -2,13 +2,17 @@ package com.example.userservice.controller;
 
 import com.example.userservice.model.User;
 import com.example.userservice.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.userservice.client.BillingClient;
 
 
 import java.util.List;
@@ -26,13 +30,29 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BillingClient billingClient; //для cервиса billing
+
+   // @Value("${jwt.secret}")
+   // private String jwtSecret;
+
+
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+
         // Хешируем пароль перед сохранением
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        // Сохраняем пользователя в базе данных
         User createdUser = userRepository.save(user);
+
+        // Вызываем billing-service для создания кошелька
+        try {
+            billingClient.createWallet(createdUser.getId());
+        } catch (Exception e) {
+            // логируем, пробрасываем ошибку, откатываем транзакцию, если нужно
+            System.err.println("Ошибка при создании кошелька: " + e.getMessage());
+        }
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
@@ -76,34 +96,33 @@ public class UserController {
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getUserByUsername(
             @PathVariable String username,
-            HttpServletRequest request,
-            Authentication authentication) {
+            @RequestHeader (value = "Authorization") String JWTtoken,
+            HttpServletRequest request) {
+        String subjectName = Jwts.parser()
+                .setSigningKey("bXktc2VjcmV0LWtleS0xMjM0NTY3ODkwLWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6".getBytes())
+                .parseClaimsJws(JWTtoken)
+                .getBody().getSubject();
+        logger.info(" Authenticated username from token: {}", subjectName);
+
+           // HttpServletRequest request,
+           // Authentication authentication) {
 
         String remoteAddr = request.getRemoteAddr();
         logger.info("Request from IP: {} to /username/{}", remoteAddr, username);
 
-        /* 1. Разрешаем доступ с внутренних IP
-        if (remoteAddr.equals("127.0.0.1") ||
-                remoteAddr.startsWith("172.") ||
-                remoteAddr.startsWith("10.") ||
-                remoteAddr.startsWith("192.168.")) {
-            Optional<User> user = userRepository.findByUsername(username);
-            return user.map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } */
+
 
         // 2. Проверяем, аутентифицирован ли пользователь (наличие JWT)
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (subjectName == null) {
             logger.warn("Unauthorized access attempt to /username/{} from {}", username, remoteAddr);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        String requesterName = authentication.getName();
-        logger.info(" Authenticated username from token: {}", requesterName);
+        // String requesterName = authentication.getName();
 
         // 3. Только если имя из токена совпадает с запрошенным — разрешаем
-        if (!username.equals(requesterName)) {
-            logger.warn("Forbidden: requested '{}' but token contains '{}'", username, requesterName);
+        if (!username.equals(subjectName)) {
+            logger.warn("Forbidden: requested '{}' but token contains '{}'", username, subjectName);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden: Access denied to user data");
         }
 
