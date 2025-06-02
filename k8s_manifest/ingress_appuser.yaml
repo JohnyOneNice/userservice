@@ -34,3 +34,12 @@ spec:
                 name: billing-service  # Имя Service для billing_service
                 port:
                   number: 80
+
+          # Маршрут для billing_service
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service  # Имя Service для order_service
+                port:
+                  number: 80
