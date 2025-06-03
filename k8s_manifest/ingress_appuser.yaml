@@ -35,11 +35,20 @@ spec:
                 port:
                   number: 80
 
-          # Маршрут для billing_service
+          # Маршрут для order_service
           - path: /api/orders
             pathType: Prefix
             backend:
               service:
                 name: order-service  # Имя Service для order_service
+                port:
+                  number: 80
+
+          # Маршрут для notifi_service
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: notifi-service  # Имя Service для order_service
                 port:
                   number: 80
