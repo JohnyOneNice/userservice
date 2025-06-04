@@ -52,3 +52,21 @@ spec:
                 name: notifi-service  # Имя Service для order_service
                 port:
                   number: 80
+
+          # Маршрут для inventory_service
+          - path: /api/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: invent-service  # Имя Service для order_service
+                port:
+                  number: 80
+
+          # Маршрут для delivery_service
+          - path: /api/delivery
+            pathType: Prefix
+            backend:
+              service:
+                name: deliv-service  # Имя Service для order_service
+                port:
+                  number: 80
