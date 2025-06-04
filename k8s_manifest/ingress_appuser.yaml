@@ -25,3 +25,48 @@ spec:
                 name: auth-service  # Имя Service для auth-service
                 port:
                   number: 80
+
+          # Маршрут для billing_service
+          - path: /api/billing
+            pathType: Prefix
+            backend:
+              service:
+                name: billing-service  # Имя Service для billing_service
+                port:
+                  number: 80
+
+          # Маршрут для order_service
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service  # Имя Service для order_service
+                port:
+                  number: 80
+
+          # Маршрут для notifi_service
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: notifi-service  # Имя Service для order_service
+                port:
+                  number: 80
+
+          # Маршрут для inventory_service
+          - path: /api/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: invent-service  # Имя Service для order_service
+                port:
+                  number: 80
+
+          # Маршрут для delivery_service
+          - path: /api/delivery
+            pathType: Prefix
+            backend:
+              service:
+                name: deliv-service  # Имя Service для order_service
+                port:
+                  number: 80
