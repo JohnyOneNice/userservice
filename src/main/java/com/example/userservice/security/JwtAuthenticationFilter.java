@@ -2,6 +2,8 @@ package com.example.userservice.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,12 +36,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        //String token = authHeader.substring(7); // Remove "Bearer "
+        String token = authHeader.substring(7); // Remove "Bearer "
 
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecret.getBytes())
-                    .parseClaimsJws(authHeader)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret)))
+                    .build()
+                    .parseClaimsJws(token)
                     .getBody();
 
             String username = claims.getSubject();
